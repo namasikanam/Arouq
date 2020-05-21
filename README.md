@@ -11,3 +11,11 @@ Course Project of Fundamentals of Search Engine Technology
     4. 找出现在查询的字数最多的关系名
 * TODO：考虑同义词？ 使用 SQL？
 * 好的查询：原子的定义
+
+### 英文
+* 流程 （TODO）
+    1. 去停用词
+    2. 使用 xlore 查询 Wikipedia 对应词项，或直接在 Wikipedia 里查词
+    3. 将开头喂给 bert
+    4. 将其他词出现较多的位置喂给 bert
+    5. 取 bert 评分最大的位置
