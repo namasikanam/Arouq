@@ -2,3 +2,4 @@ scripts/*
 dataset/baidu_stopwords.txt
 dataset/info.dump
 dataset/xlore.property.list.ttl
+dataset/bert-base-squad2
