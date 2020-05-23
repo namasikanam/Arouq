@@ -4,6 +4,8 @@ import jieba
 import requests
 import bisect
 import pickle
+from utils import remove_stopwords
+
 
 dic = []
 print("[xlore.property.list]")
@@ -22,14 +24,6 @@ with open('../dataset/xlore.property.list.ttl', encoding='utf-8') as f:
     print("\n total {}".format(len(dic)))
 dic.sort()
 print("[xlore.property.list] Init End")
-
-print("[stopwords]")
-stopwords = set()
-with open('../dataset/baidu_stopwords.txt', encoding='utf-8') as f:
-    for st in f.readlines():
-        stopwords.add(st.strip())
-    print("total: {}".format(len(stopwords)))
-print("[stopwords] Init End")
 
 print("[xlore.infobox]")
 with open('../dataset/info.dump', 'rb') as f:
@@ -53,11 +47,7 @@ def xlore_instances(word):
 
 def get_tokens(question):
     seg_list = jieba.lcut(question)
-    ret = []
-    for st in seg_list:
-        if st not in stopwords:
-            ret.append(st)
-    return ret
+    return remove_stopwords(seg_list)
 
 
 def info_search(uri):
