@@ -1,5 +1,6 @@
 # Arouq
-Course Project of Fundamentals of Search Engine Technology
+
+Arouq是《搜索引擎技术基础》的课程项目，是一个demo级别的知识搜索引擎。
 
 ## QA
 ### 中文
@@ -19,3 +20,18 @@ Course Project of Fundamentals of Search Engine Technology
     3. 将开头喂给 bert
     4. 将其他词出现较多的位置喂给 bert
     5. 取 bert 评分最大的位置
+
+
+## 前端
+
+安装
+```bash
+cd frontend/
+npm install
+```
+
+运行
+```bash
+cd frontend/
+npm start
+```
