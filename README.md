@@ -14,8 +14,8 @@ Course Project of Fundamentals of Search Engine Technology
 
 ### 英文
 * 流程 （TODO）
-    1. 去停用词
-    2. 使用 xlore 查询 Wikipedia 对应词项，或直接在 Wikipedia 里查词
+    1. 分词，去停用词
+    2. 在 Wikipedia 里查词
     3. 将开头喂给 bert
     4. 将其他词出现较多的位置喂给 bert
     5. 取 bert 评分最大的位置
