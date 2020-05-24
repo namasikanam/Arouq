@@ -9,6 +9,7 @@ print("[Bert]")
 tokenizer = BertTokenizer.from_pretrained('../dataset/bert-base-squad2')
 basicTokenizer = BasicTokenizer()
 model = BertForQuestionAnswering.from_pretrained('../dataset/bert-base-squad2')
+model = model.cuda()
 print("[Bert] Init End!")
 
 print("[Wiki]")
@@ -16,7 +17,7 @@ wiki = wikipediaapi.Wikipedia('en')
 print("[Wiki] Init End")
 
 
-def bert_QA(question, answer_text):
+def bert(question, answer_text):
     for i in range(len(answer_text)):
         tokens = tokenizer.encode(question, ' '.join(answer_text[:i+1]))
         if len(tokens) < 512:
@@ -27,7 +28,7 @@ def bert_QA(question, answer_text):
     num_seg_a = sep_index + 1
     num_seg_b = len(input_ids) - num_seg_a
     segment_ids = [0] * num_seg_a + [1] * num_seg_b
-    start_scores, end_scores = model(torch.tensor([input_ids]), token_type_ids = torch.tensor([segment_ids]))
+    start_scores, end_scores = model(torch.tensor([input_ids]).cuda(), token_type_ids = torch.tensor([segment_ids]).cuda())
     answer_start = torch.argmax(start_scores)
     answer_end = torch.argmax(end_scores)
     tokens = tokenizer.convert_ids_to_tokens(input_ids)
@@ -53,7 +54,7 @@ def wiki_sentence(word):
     return sent_tokenize(page)
 
 
-def QA(question):
+def bert_QA(question):
     print("[QA] ", question)
     keywords = get_keywords(question)
     print("[Keywords]", keywords)
@@ -88,7 +89,7 @@ def QA(question):
         candidates = candidates[:min(len(candidates), 10)]
         print("  [Candidates] ", candidates)
         for _, pos in candidates:
-            ans, score = bert_QA(question, sents[pos:])
+            ans, score = bert(question, sents[pos:])
             print("  [Bert] Answer at {}: {} {}".format(pos, ans, score))
             if score > max_score and ans is not None:
                 best_answer = ans

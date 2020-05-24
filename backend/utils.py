@@ -8,3 +8,9 @@ print("[stopwords] Init End")
 
 def remove_stopwords(wordlist):
     return list(filter(lambda x: x not in stopwords, wordlist))
+
+def contain_english(st):
+    for ch in st:
+        if 'a' <= ch <= 'z' or 'A' <= ch <= 'Z':
+            return True
+    return False
