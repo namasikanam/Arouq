@@ -7,14 +7,13 @@
 │   ├── pytorch_model.bin
 │   └── vocab.txt
 ├── gen-info.py
-├── info.dump
 ├── readme.md
 └── xlore.property.list.ttl
 ```
 
 # xlore_qa.py 所需的文件
 1. baidu_stopwords.txt # download from https://github.com/goto456/stopwords.git
-2. info.dump # run gen-info.py, needs xlore.infobox.ttl
+2. A sql database generated from xlore.infobox.ttl, refer to gen-info.py
 3. xlore.property.list.ttl # download from xlore
 
 # bert_qa.py 所需的文件
