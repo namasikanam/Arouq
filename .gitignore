@@ -1,6 +1,14 @@
+# Data set and scripts
 scripts/
 dataset/baidu_stopwords.txt
 dataset/info.dump
 dataset/xlore.property.list.ttl
 dataset/bert-base-squad2
+
+# modules
+frontend/node_modules/
+frontend/package-lock.json
 __pycache__/
+
+# Editor auxiliary directories and files
+.vscode
