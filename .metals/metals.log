@@ -1,8 +1,0 @@
-2020.05.23 11:29:40 INFO  started: Metals version 0.9.0 in workspace '/mnt/c/Users/namas/Documents/Course/2020Spring/FundamentalsofSearchEngineTechnology/Arouq'
-2020.05.23 11:29:42 INFO  time: initialize in 1.92s
-2020.05.23 11:29:43 WARN  no build tool detected in workspace '/mnt/c/Users/namas/Documents/Course/2020Spring/FundamentalsofSearchEngineTechnology/Arouq'. The most common cause for this problem is that the editor was opened in the wrong working directory, for example if you use sbt then the workspace directory should contain build.sbt. 
-May 23, 2020 12:18:30 PM org.eclipse.lsp4j.jsonrpc.services.GenericEndpoint notify
-INFO: Unsupported notification method: $/setTraceNotification
-May 23, 2020 12:22:14 PM org.eclipse.lsp4j.jsonrpc.services.GenericEndpoint notify
-INFO: Unsupported notification method: $/setTraceNotification
-2020.05.23 19:31:37 INFO  shutting down Metals

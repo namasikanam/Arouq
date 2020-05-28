@@ -12,3 +12,4 @@ __pycache__/
 
 # Editor auxiliary directories and files
 .vscode
+.metals/
