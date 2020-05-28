@@ -4,6 +4,7 @@ import jieba
 import requests
 import bisect
 import pickle
+import pymysql
 from utils import remove_stopwords
 
 
@@ -26,8 +27,8 @@ dic.sort()
 print("[xlore.property.list] Init End")
 
 print("[xlore.infobox]")
-with open('../dataset/info.dump', 'rb') as f:
-    info = pickle.load(f)
+db = pymysql.connect("localhost", "root", "123456", "xlore", charset='utf8')
+cursor = db.cursor()
 print("[xlore.infobox] Init End")
 
 def xlore_get(word): # may throw exception
@@ -49,14 +50,10 @@ def get_tokens(question):
     seg_list = jieba.lcut(question)
     return remove_stopwords(seg_list)
 
-
 def info_search(uri):
-    global info
-    left = bisect.bisect_left(info, (uri, ""))
-    ret = []
-    while left < len(info) and info[left][0] == uri:
-        ret.append(info[left])
-        left += 1
+    cmd = "select * from info where instance = '{}'".format(uri)
+    cursor.execute(cmd)
+    ret = cursor.fetchall()
     return ret
 
 def dict_to_name(x):
