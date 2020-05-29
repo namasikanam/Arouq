@@ -1,39 +1,28 @@
 <template>
   <div>
     <header-navbar></header-navbar>
+    <b-navbar fixed="top" sticky="true" class="head bg-white shadow-sm">
+      <a class="logo" href=".">ArouQ</a>
+      <search-input
+        class="search-input"
+        v-on:newSearch="newSearch"
+        ref="input"
+        style="padding-left: 30px"
+      ></search-input>
+    </b-navbar>
     <b-container fluid class="container-main">
-      <div class="head">
-        <a class="logo" href=".">ArouQ</a>
-        <search-input
-          class="search-input"
-          v-on:newSearch="newSearch"
-          ref="input"
-        ></search-input>
-      </div>
       <div class="search-output">
-        <div class="conditions" v-if="conditions !== ''">
-          Advanced search conditions: {{ conditions }}
-        </div>
         <div class="total" v-if="total > 0">
-          About {{ total.toLocaleString() }} results
+          {{ total.toLocaleString() }} results found.
         </div>
         <div class="no-result" v-if="total === 0 && !init">
+          <!-- Maybe something wrong happens. -->
           No matched document.
         </div>
-        <div class="correct" v-if="correct !== ''">
-          Showing results for
-          <span>{{ correct }}</span
-          >. Or search for
-          <a v-on:click="searchWithoutCheck" href="javascript:;">{{ query }}</a>
-          instead
-        </div>
-        <div class="suggestion" v-if="suggestion !== ''">
-          Did you mean:
-          <a v-on:click="takeSuggestion" href="javascript:;">{{
-            suggestion
-          }}</a>
-        </div>
+        <b-card class="answer" v-bind:title="answer" v-if="answer !== ''">
+        </b-card>
         <div class="document" v-for="item in documents" :key="item.index">
+          <div class="url">{{ item.url }}</div>
           <a
             class="title"
             v-html="item.title"
@@ -41,7 +30,6 @@
             target="_blank"
           ></a>
           <div class="content" v-html="item.content"></div>
-          <span class="url">{{ item.url }}</span>
         </div>
         <div class="pagination" v-if="total > 0">
           <b-pagination
@@ -53,7 +41,8 @@
             v-bind:limit="10"
             hide-ellipsis
             hide-goto-end-buttons
-          ></b-pagination>
+          >
+          </b-pagination>
         </div>
       </div>
     </b-container>
@@ -64,180 +53,98 @@
 import HeaderNavbar from "@/components/HeaderNavbar.vue";
 import SearchInput from "@/components/SearchInput.vue";
 import axios from "axios";
+import randomstring from "randomstring";
 
 export default {
   name: "search",
   components: { HeaderNavbar, SearchInput },
   data() {
-    let query = "";
+    let query = ''
     if (this.$route.params.query !== undefined) {
-      query = this.$route.params.query;
+      query = this.$route.params.query
     }
-    let page = 1;
+    let page = 1
     if (this.$route.params.page !== undefined) {
-      page = parseInt(this.$route.params.page);
-    }
-    let advanced = {
-      exact: this.$route.query.exact,
-      any: this.$route.query.any,
-      none: this.$route.query.none,
-      site: this.$route.query.site,
-      position: this.$route.query.position,
-      type: this.$route.query.type
-    };
-    let advancedPath = "?",
-      conditions = "";
-    if (query.indexOf("(Advanced Search)") === 0) {
-      advancedPath += "?";
-      if (advanced.exact !== undefined && advanced.exact !== "") {
-        conditions += ` exact: "${advanced.exact}";`;
-        advancedPath += `&exact=${advanced.exact}`;
-      }
-      if (advanced.any !== undefined && advanced.any !== "") {
-        conditions += ` any: "${advanced.any}";`;
-        advancedPath += `&any=${advanced.any}`;
-      }
-      if (advanced.none !== undefined && advanced.none !== "") {
-        conditions += ` none: "${advanced.none}";`;
-        advancedPath += `&none=${advanced.none}`;
-      }
-      if (advanced.site !== undefined && advanced.site !== "") {
-        conditions += ` site: "${advanced.site}";`;
-        advancedPath += `&site=${advanced.site}`;
-      }
-      if (
-        advanced.position !== undefined &&
-        advanced.position.indexOf("any") === -1
-      ) {
-        conditions += ` position: "${advanced.position}";`;
-        advancedPath += `&position=${advanced.position}`;
-      }
-      if (advanced.type !== undefined && advanced.type.indexOf("any") === -1) {
-        conditions += ` type: "${advanced.type}";`;
-        advancedPath += `&type=${advanced.type}`;
-      }
-    }
-    let check = true;
-    if (this.$route.query.nocheck !== undefined) {
-      check = false;
+      page = parseInt(this.$route.params.page)
     }
     history.replaceState(
       {
         query,
-        page,
-        advanced
+        page
       },
-      "",
+      '',
       `/?#${this.$route.fullPath}`
-    );
+    )
     return {
-      query,
-      page,
-      advanced,
-      advancedPath,
-      conditions,
-      check,
-      documents: [],
+      query: query,
+      page: page,
       total: 0,
-      candidates: [],
-      init: true,
-      correct: "",
-      suggestion: ""
+      documents: [],
+      init: false
     };
   },
   methods: {
     async getResults() {
       let response;
       this.$refs.input.updateQuery(this.query);
-      if (this.query.indexOf("(Advanced Search)") === 0) {
-        let params = { page: this.page };
-        if (this.advanced.exact !== "") {
-          params["exact"] = this.advanced.exact;
+      // TODO: query to backend
+      //   response = await axios.get("/api/_query", {
+      //     params: { query: this.query, page: this.page }
+      //   });
+      let random_documents = [];
+      //   let random_total = Math.floor(Math.random() * 100);
+      let random_total = 10000;
+      for (let i = 0; i < Math.min(random_total, 10); ++i) {
+        let random_content = [];
+        for (let j = Math.floor(Math.random() * 10) + 10; j--;)
+          random_content.push(randomstring.generate(10) + ' ');
+        let random_doc = {
+          title: randomstring.generate(10),
+          content: random_content,
+          url: randomstring.generate(3) + "." + randomstring.generate(5) + "." + randomstring.generate(3)
         }
-        if (this.advanced.any !== "") {
-          params["any"] = this.advanced.any;
-        }
-        if (this.advanced.none !== "") {
-          params["none"] = this.advanced.none;
-        }
-        if (this.advanced.site !== "") {
-          params["site"] = this.advanced.site;
-        }
-        if (this.advanced.position !== undefined) {
-          const positionOptions = ["any", "title", "content", "link"];
-          for (let i = 0; i < positionOptions.length; ++i) {
-            if (this.advanced.position.indexOf(positionOptions[i]) !== -1) {
-              params["position"] = positionOptions[i];
-            }
-          }
-        }
-        if (this.advanced.type !== undefined) {
-          const typeOptions = ["any", "html", "pdf", "doc/docx"];
-          for (let i = 0; i < typeOptions.length; ++i) {
-            if (this.advanced.type.indexOf(typeOptions[i]) !== -1) {
-              params["file_type"] = typeOptions[i];
-            }
-          }
-        }
-        response = await axios.get("/api/_advanced_query", {
-          params
-        });
-        this.correct = "";
-      } else {
-        response = await axios.get("/api/_query", {
-          params: { query: this.query, page: this.page }
-        });
-        if (
-          this.check &&
-          response.data.documents.length === 0 &&
-          response.data.correct !== undefined
-        ) {
-          this.correct = response.data.correct;
-          response = await axios.get("/api/_query", {
-            params: { query: this.correct, page: this.page }
-          });
-        } else {
-          this.correct = "";
-          this.suggestion = "";
-          if (
-            response.data.correct !== undefined &&
-            response.data.correct !== this.query
-          ) {
-            this.suggestion = response.data.correct;
-          }
-        }
+        random_documents.push(random_doc);
       }
-      console.log(response);
+      response = {
+        data: {
+          total: random_total,
+          documents: random_documents,
+          answer: randomstring.generate()
+        }
+      };
+
       if (response.data === null) {
         response.data = {
+          total: 0,
           documents: [],
-          total: 0
+          answer: ''
         };
       }
+      console.log(response);
+
       let documents = [];
       this.total = response.data.total;
+      this.answer = response.data.answer;
       for (let i = 0; i < response.data.documents.length; ++i) {
-        let doc = response.data.documents[i];
-        doc.index = i;
-        doc.url = "http://" + doc.url;
-        if (doc.title === "" && doc.content.length > 0) {
-          let contentWords = doc.content.split(" ");
-          for (let j = 0; j < contentWords.length; ++j) {
-            if (
-              contentWords[j].indexOf("<") !== -1 ||
-              contentWords[j].indexOf("=") !== -1 ||
-              contentWords[j].indexOf(">") !== -1
-            ) {
-              continue;
-            }
-            if (contentWords[j] !== "" && contentWords[j].length > 1) {
-              doc.title = contentWords[j];
-              break;
-            }
+        let resdoc = response.data.documents[i]
+        let doc = {
+          title: resdoc.title,
+          content: "",
+          url: resdoc.url,
+          index: i
+        };
+        for (let j = 0; j < resdoc.content.length; ++j)
+          if (j % 2 == 1) {
+            doc.content += "\<span class=\"highlight\"\>" + resdoc.content[j] + "\</span\>"
           }
-        }
+          else {
+            doc.content += resdoc.content[j]
+          }
         if (doc.title !== "") {
           documents.push(doc);
+        }
+        else {
+          console.log("ERROR: receive a document without title!");
         }
       }
       this.documents = documents;
@@ -247,49 +154,13 @@ export default {
     newSearch(query) {
       if (query === "") {
         window.location.assign("/#/");
-        return;
-      } else if (query.indexOf("(Advanced Search)") === 0) {
-        this.goAdvanced();
-        return;
       } else {
         window.location.assign(`/#/search/${query}/1`);
       }
     },
-    searchWithoutCheck() {
-      window.location.assign(
-        `/#/search/${this.query}/1${this.advancedPath}?nocheck`
-      );
-    },
-    takeSuggestion() {
-      window.location.assign(
-        `/#/search/${this.suggestion}/1${this.advancedPath}`
-      );
-    },
-    goAdvanced() {
-      var path = "/#/advanced_search?";
-      if (this.advanced.exact !== undefined) {
-        path += `&exact=${this.advanced.exact}`;
-      }
-      if (this.advanced.any !== undefined) {
-        path += `&any=${this.advanced.any}`;
-      }
-      if (this.advanced.none !== undefined) {
-        path += `&none=${this.advanced.none}`;
-      }
-      if (this.advanced.site !== undefined) {
-        path += `&site=${this.advanced.site}`;
-      }
-      if (this.advanced.position !== undefined) {
-        path += `&position=${this.advanced.position}`;
-      }
-      if (this.advanced.type !== undefined) {
-        path += `&type=${this.advanced.type}`;
-      }
-      window.location.assign(path);
-    },
     changePage(page) {
       window.location.assign(
-        `/#/search/${this.query}/${page}${this.advancedPath}`
+        `/#/search/${this.query}/${page}`
       );
     }
   },
@@ -299,7 +170,6 @@ export default {
   beforeRouteUpdate(to, from, next) {
     this.query = to.params.query;
     this.page = parseInt(to.params.page);
-    this.advanced = to.query;
     this.getResults();
     next();
   }
@@ -335,6 +205,10 @@ export default {
     a {
       font-weight: bold;
     }
+  }
+
+  .answer {
+    margin-top: 20px;
   }
 
   .document {

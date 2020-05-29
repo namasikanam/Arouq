@@ -10,15 +10,7 @@ module.exports = {
         // Paths
         assetsSubDirectory: 'static',
         assetsPublicPath: '/',
-        proxyTable: {
-            '/api': {
-                target: 'http://166.111.5.161:8044/SearchTHU_war/servlet/THUSearch', // TODO: How this is used?
-                changeOrigin: true,
-                pathRewrite: {
-                    '^/api': '/'
-                }
-            }
-        },
+        // TODO: proxyTable here for query backend
 
         // Various Dev Server settings
         host: 'localhost', // can be overwritten by process.env.HOST

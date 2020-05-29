@@ -35,3 +35,7 @@ npm install
 cd frontend/
 npm start
 ```
+
+## 开源协议
+
+MIT

@@ -21,6 +21,9 @@ export default {
   methods: {
     goSearch() {
       this.$emit("newSearch", this.query);
+    },
+    updateQuery(query) {
+      this.query = query
     }
   }
 };

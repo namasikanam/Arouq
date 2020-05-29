@@ -29,7 +29,7 @@ export default {
 }
 
 .container-main {
-  padding: 20px 50px;
+  padding: 20px 135px;
   margin-bottom: 20px;
 }
 
