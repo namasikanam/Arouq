@@ -25,12 +25,14 @@ def QA():
     if corrected is None:
         corrected = ''
 
-    return jsonify({
+    result = {
         'answer': ans,
         'corrected': corrected,
         'total': 0,
         'documents': []
-    })
+    }
+    print(result)
+    return jsonify(result)
 
 if __name__ == '__main__':
-    app.run(host='127.0.0.1', port='8001', debug = True)
+    app.run(host='0.0.0.0', port='443', debug = True)

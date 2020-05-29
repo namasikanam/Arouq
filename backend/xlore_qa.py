@@ -76,6 +76,7 @@ def get_relations(uri):
 def xlore_QA(question):
     print("[Question] ", question, flush = True)
     tokens = get_tokens(question)
+    token_string = ''.join(tokens)
     mx = 0
     QA_ret = None
     for token in set(tokens):
@@ -88,7 +89,7 @@ def xlore_QA(question):
             for item in relations:
                 score = 0
                 for s in item[0]:
-                    score += 1 if s in question else 0
+                    score += 1 if s in token_string and s not in token else 0
                 if score > mx:
                     mx = score
                     QA_ret = item[1]
@@ -98,4 +99,5 @@ def xlore_QA(question):
     return QA_ret
 
 if __name__ == '__main__':
+    print(xlore_QA("今天是个好天气"))
     print(xlore_QA("原子的定义"))
