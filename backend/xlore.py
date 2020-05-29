@@ -5,6 +5,7 @@ import requests
 import bisect
 import pickle
 import pymysql
+import random
 from utils import remove_stopwords
 
 
@@ -43,7 +44,13 @@ def xlore_instances(word):
         return []
     ret = []
     for ins in resp['Instances']:
-        ret.append((ins['Label'], ins['Uri'].split('/')[-1]))
+        related = []
+        for item in ins['Related Instances']:
+            related.append(item['Label'])
+        ret.append({
+            'label': ins['Label'],
+            'uri': ins['Uri'].split('/')[-1],
+            'related': related})
     return ret
 
 def get_tokens(question):
@@ -73,18 +80,19 @@ def get_relations(uri):
             ret.append((name, x[2]))
     return ret
 
-def xlore_QA(question):
+def run(question):
     print("[Question] ", question, flush = True)
     tokens = get_tokens(question)
     token_string = ''.join(tokens)
     mx = 0
     QA_ret = None
+    related = []
     for token in set(tokens):
         print(" [Token] ", token, flush = True)
         uris = xlore_instances(token)
         for uri in uris:
-            print("    [URI] ", uri, flush = True)
-            relations = get_relations(uri[1])
+            print("    [URI] ", uri['label'], uri['uri'], flush = True)
+            relations = get_relations(uri['uri'])
             print("    [Relation] ", relations, flush = True)
             for item in relations:
                 score = 0
@@ -95,9 +103,34 @@ def xlore_QA(question):
                     QA_ret = item[1]
                     print("[Answer]", QA_ret, item)
                 print("      [Item] ", item[0], item[1], score, flush = True)
+            if uri['label'] == token and len(relations) > 2:
+                related.append(uri['related'])
+                print("      [Related]", uri['related'])
+    related_ret = []
+    max_related = 5
+    if sum([len(x) for x in related]) > max_related:
+        assign = [len(x) for x in related]
+        total = sum(assign)
+        assign = [x * max_related // total for x in assign]
+        remain = total - sum(assign)
+        while sum(assign) < max_related:
+            x = random.randint(0, len(related) - 1)
+            if assign[x] < len(related[x]):
+                assign[x] += 1
+        print(assign)
+        for r, a in zip(related, assign):
+            related_ret.extend(random.sample(r, a))
+    else:
+        for x in related:
+            related_ret.extend(x)
     print("[Final Score]", mx)
-    return QA_ret
+    print("[Related]", related_ret)
+    return {
+        'QA_ret': QA_ret,
+        'related': related_ret,
+    }
 
 if __name__ == '__main__':
-    print(xlore_QA("今天是个好天气"))
-    print(xlore_QA("原子的定义"))
+    print(run("今天是个好天气"))
+    print(run("原子的定义"))
+    print(run("清华大学"))
