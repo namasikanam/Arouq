@@ -1,7 +1,7 @@
 <template>
   <div>
     <header-navbar></header-navbar>
-    <b-navbar fixed="top" sticky="true" class="head bg-white shadow-sm">
+    <b-navbar fixed="top" sticky class="head bg-white shadow-sm">
       <a class="logo" href=".">ArouQ</a>
       <search-input
         class="search-input"
@@ -80,6 +80,7 @@ export default {
       page: page,
       total: 0,
       documents: [],
+      answer: "",
       init: false
     };
   },
@@ -87,31 +88,31 @@ export default {
     async getResults() {
       let response;
       this.$refs.input.updateQuery(this.query);
-      // TODO: query to backend
-      //   response = await axios.get("/api/_query", {
-      //     params: { query: this.query, page: this.page }
-      //   });
-      let random_documents = [];
+      console.log('Before get');
+      response = await axios.get("/api/", {
+        params: { query: this.query, page: this.page }
+      });
+      console.log('After get');
+      //   let random_documents = [];
       //   let random_total = Math.floor(Math.random() * 100);
-      let random_total = 10000;
-      for (let i = 0; i < Math.min(random_total, 10); ++i) {
-        let random_content = [];
-        for (let j = Math.floor(Math.random() * 10) + 10; j--;)
-          random_content.push(randomstring.generate(10) + ' ');
-        let random_doc = {
-          title: randomstring.generate(10),
-          content: random_content,
-          url: randomstring.generate(3) + "." + randomstring.generate(5) + "." + randomstring.generate(3)
-        }
-        random_documents.push(random_doc);
-      }
-      response = {
-        data: {
-          total: random_total,
-          documents: random_documents,
-          answer: randomstring.generate()
-        }
-      };
+      //   for (let i = 0; i < Math.min(random_total, 10); ++i) {
+      //     let random_content = [];
+      //     for (let j = Math.floor(Math.random() * 10) + 10; j--;)
+      //       random_content.push(randomstring.generate(10) + ' ');
+      //     let random_doc = {
+      //       title: randomstring.generate(10),
+      //       content: random_content,
+      //       url: randomstring.generate(3) + "." + randomstring.generate(5) + "." + randomstring.generate(3)
+      //     }
+      //     random_documents.push(random_doc);
+      //   }
+      //   response = {
+      //     data: {
+      //       total: random_total,
+      //       documents: random_documents,
+      //       answer: randomstring.generate()
+      //     }
+      //   };
 
       if (response.data === null) {
         response.data = {

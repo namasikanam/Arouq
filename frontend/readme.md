@@ -16,6 +16,7 @@ Successful Response
 ```javascript
 {
     "total": 检索到的文档总量
+    "answer": QA 的答案
     "documents": [
         document1,
         ...

@@ -6,29 +6,29 @@ from xlore_qa import xlore_QA as chinese_qa
 
 app = Flask(__name__)
 
-@app.route('/')
-def hello_world():
-    return 'Hello World!'
-
-@app.route('/QA', methods = ['GET'])
+@app.route('/', methods = ['GET'])
 def QA():
     print(request.args)
-    question = request.args.get('question')
-    print("[Router] Question: {}".format(question))
-    if contain_english(question):
-        ans, score = english_qa(question)
+    query = request.args.get('query')
+    print("[Router] Query: {}".format(query))
+    if contain_english(query):
+        ans, score = english_qa(query)
         if score < 3:
             ans = None
     else:
-        ans = chinese_qa(question)
+        ans = chinese_qa(query)
     if ans is not None:
         return jsonify({
-            'answer': ans
+            'answer': ans,
+            'total': 0,
+            'documents': []
         })
     else:
         return jsonify({
-            'answer': ''
+            'answer': '',
+            'total': 0,
+            'documents': []
         })
 
 if __name__ == '__main__':
-    app.run(host='127.0.0.1', port='5001', debug = True)
+    app.run(host='127.0.0.1', port='8001', debug = True)
