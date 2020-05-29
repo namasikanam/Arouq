@@ -1,15 +1,16 @@
 <template>
   <div>
     <header-navbar></header-navbar>
+    <b-navbar fixed="top" sticky="true" class="head bg-white shadow-sm">
+      <a class="logo" href=".">ArouQ</a>
+      <search-input
+        class="search-input"
+        v-on:newSearch="newSearch"
+        ref="input"
+        style="padding-left: 30px"
+      ></search-input>
+    </b-navbar>
     <b-container fluid class="container-main">
-      <div class="head">
-        <a class="logo" href=".">ArouQ</a>
-        <search-input
-          class="search-input"
-          v-on:newSearch="newSearch"
-          ref="input"
-        ></search-input>
-      </div>
       <div class="search-output">
         <div class="total" v-if="total > 0">
           {{ total.toLocaleString() }} results found.
@@ -18,6 +19,8 @@
           <!-- Maybe something wrong happens. -->
           No matched document.
         </div>
+        <b-card class="answer" v-bind:title="answer" v-if="answer !== ''">
+        </b-card>
         <div class="document" v-for="item in documents" :key="item.index">
           <div class="url">{{ item.url }}</div>
           <a
@@ -73,7 +76,6 @@ export default {
       `/?#${this.$route.fullPath}`
     )
     return {
-      // TODO: more is needed
       query: query,
       page: page,
       total: 0,
@@ -106,18 +108,23 @@ export default {
       response = {
         data: {
           total: random_total,
-          documents: random_documents
+          documents: random_documents,
+          answer: randomstring.generate()
         }
       };
 
-      console.log(response);
       if (response.data === null) {
         response.data = {
-          documents: []
+          total: 0,
+          documents: [],
+          answer: ''
         };
       }
+      console.log(response);
+
       let documents = [];
       this.total = response.data.total;
+      this.answer = response.data.answer;
       for (let i = 0; i < response.data.documents.length; ++i) {
         let resdoc = response.data.documents[i]
         let doc = {
@@ -198,6 +205,10 @@ export default {
     a {
       font-weight: bold;
     }
+  }
+
+  .answer {
+    margin-top: 20px;
   }
 
   .document {

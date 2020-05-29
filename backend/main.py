@@ -23,12 +23,11 @@ def QA():
         ans = chinese_qa(question)
     if ans is not None:
         return jsonify({
-            'msg': 'Success',
             'answer': ans
         })
     else:
         return jsonify({
-            'msg': 'NoAnswer',
+            'answer': ''
         })
 
 if __name__ == '__main__':
