@@ -6,6 +6,7 @@ import bisect
 import pickle
 import pymysql
 import random
+import synonyms
 from utils import remove_stopwords
 
 
@@ -33,7 +34,7 @@ cursor = db.cursor()
 print("[xlore.infobox] Init End")
 
 def xlore_get(word): # may throw exception
-    resp = requests.get('http://api.xlore.org/query?word=', params = {'word': word})
+    resp = requests.get('http://api.xlore.org/query', params = {'word': word})
     return resp.json()
 
 def xlore_instances(word):
@@ -90,6 +91,14 @@ def run(question):
     for token in set(tokens):
         print(" [Token] ", token, flush = True)
         uris = xlore_instances(token)
+        syns = set()
+        syns.add(token)
+        syn_raw, scores = synonyms.nearby(token)
+        for syn, score in zip(syn_raw, scores):
+            print(syn, score)
+            if score > 0.75:
+                syns.add(syn)
+        print("    [Synonym]", syns)
         for uri in uris:
             print("    [URI] ", uri['label'], uri['uri'], flush = True)
             relations = get_relations(uri['uri'])
@@ -103,7 +112,7 @@ def run(question):
                     QA_ret = item[1]
                     print("[Answer]", QA_ret, item)
                 print("      [Item] ", item[0], item[1], score, flush = True)
-            if uri['label'] == token and len(relations) > 2:
+            if uri['label'] in syns and len(relations) > 2:
                 related.append(uri['related'])
                 print("      [Related]", uri['related'])
     related_ret = []
@@ -117,7 +126,6 @@ def run(question):
             x = random.randint(0, len(related) - 1)
             if assign[x] < len(related[x]):
                 assign[x] += 1
-        print(assign)
         for r, a in zip(related, assign):
             related_ret.extend(random.sample(r, a))
     else:
@@ -132,5 +140,5 @@ def run(question):
 
 if __name__ == '__main__':
     print(run("今天是个好天气"))
-    print(run("原子的定义"))
-    print(run("清华大学"))
+    # print(run("原子的定义"))
+    # print(run("清华"))

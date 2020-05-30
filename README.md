@@ -25,8 +25,9 @@ Arouq是《搜索引擎技术基础》的课程项目，是一个demo级别的�
 * 流程：
     1. jieba 分词，去除停用词，获取到若干 token
     2. 使用 xlore api 找到每个 token 对应的 instance （也可以本地化）
-    3. 保留所有名称完全匹配的instance的related instance，由于xlore中存在一些脏数据，增加一个特判为“该instance必须有较多的关系数”（完全匹配是对的吗？eg instance中没有“清华”，只有“清华大学”，因此查“清华”就没有相关推荐了）
-    4. 以每个instance的related instance个数为权重，选出至多5个
+    3. 筛选出是 token 的近义词的 instance
+    4. 为避免xlore中的脏数据影响推荐，增加一个特判为“该instance必须有较多的关系数”
+    5. 以每个instance的related instance个数为权重，选出至多5个
 
 ## 前端
 
