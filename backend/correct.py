@@ -1,5 +1,7 @@
 import pycorrector
+print("[Corrector]")
 pycorrector.enable_char_error(enable=False)
+print("[Corrector] Init end")
 
 def correct(st):
     corrected, detail = pycorrector.correct(st)

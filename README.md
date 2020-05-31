@@ -44,7 +44,8 @@ npm start
 ```
 
 ## API
-
+### 搜索
+* Port: 8001
 * URL: To Be Decided
 * Method: GET
 * Body:
@@ -79,10 +80,54 @@ Successful Response
 }
 ```
 
+### 纠错
+* Port: 8002
+* URL: /correct
+* Method: GET
+* Body:
+```javascript
+{
+    "query": 查询字符串
+}
+```
+
+Successful Response
+* Code: 200 OK
+* Content:
+```javascript
+{
+    "corrected": 更正的结果，如果不需要更正，就是一个空串
+}
+```
+
+### 自动补全
+* Port: 8001
+* URL: /fill
+* Method: GET
+* Body:
+```javascript
+{
+    "query": 查询字符串
+}
+```
+
+Successful Response
+* Code: 200 OK
+* Content:
+```javascript
+{
+    "result": ["xxx", "yyy", ...] 补全结果，至多5个，可能为空列表
+}
+```
+
+
+
 ## 计划
 
-- [ ] 自动补全
-- [x] 自动检查错误，提示可能是正确的搜索输入
+- [x] 自动补全（中文）
+- [ ] 自动补全（英文）
+- [x] 自动检查错误，提示可能是正确的搜索输入（中文）
+- [ ] 纠错（英文）
 - [ ] 分数据集检索（百度、中文维基、英文维基）
 - [ ] 特殊符号处理（比如问号）
 - [x] 相关查询

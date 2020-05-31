@@ -3,7 +3,7 @@ from flask_api import status
 from utils import contain_english
 from bert_qa import bert_QA as english_qa
 from xlore import run as chinese
-from correct import correct
+from auto_fill import auto_fill
 
 app = Flask(__name__)
 
@@ -37,6 +37,19 @@ def QA():
     }
     print(result)
     return jsonify(result)
+
+
+@app.route('/fill', methods = ['GET'])
+def fill():
+    print(request.args)
+    word = request.args.get('query')
+    print("[Router] fill: {}".format(word))
+    result = {
+        'result': auto_fill(word),
+    }
+    print(result)
+    return jsonify(result)
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port='8001', debug = True)
