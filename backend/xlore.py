@@ -110,6 +110,8 @@ def run(question):
                 if score > mx:
                     mx = score
                     QA_ret = item[1]
+                    QA_ret = re.sub(r'\[\[.*?\|', "", QA_ret)
+                    QA_ret = re.sub(r'\]\]', "", QA_ret)
                     print("[Answer]", QA_ret, item)
                 print("      [Item] ", item[0], item[1], score, flush = True)
             if uri['label'] in syns and len(relations) > 2:
@@ -139,6 +141,6 @@ def run(question):
     }
 
 if __name__ == '__main__':
-    print(run("今天是个好天气"))
-    # print(run("原子的定义"))
-    # print(run("清华"))
+    # print(run("今天是个好天气"))
+    # # print(run("原子的定义"))
+    print(run("清华的知名校友"))
