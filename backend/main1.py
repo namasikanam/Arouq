@@ -12,18 +12,23 @@ app = Flask(__name__)
 def main_query():
     print(request.args)
     query = request.args.get('query')
+    page = int(request.args.get('page'))
+
     print("[Router] Query: {}".format(query))
     
+    ans = None
     if contain_english(query):
-        ans, score = english_qa(query)
-        if score < 3:
-            ans = None
+        if page == 1:
+            ans, score = english_qa(query)
+            if score < 3:
+                ans = None
         related = []
     else:
         ret = chinese(query)
-        ans = ret['QA_ret']
+        if page == 1:
+            ans = ret['QA_ret']
         related = ret['related']
-    total, documents = solr(query)
+    total, documents = solr(query, page)
 
     result = {
         'answer': ans if ans is not None else '',

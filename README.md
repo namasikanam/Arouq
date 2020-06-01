@@ -60,9 +60,9 @@ npm start
 2. 启动 Solr Cloud
 3. 创建 xlore 的 collection （中/英文各一个）
 4. 为 collection 分别配置 Schema（使用`dataset/create_schema.sh`）
-5. 为中英文数据创建索引
+5. 通过数据创建索引
 
-TODO：具体的指令以后有时间再补吧。
+TODO：数据是怎么清洗的？这也许也需要写一下……
 
 ## API
 ### 搜索
