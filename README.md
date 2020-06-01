@@ -54,16 +54,26 @@ cd frontend/
 npm start
 ```
 
+## Solr 配置
+
+1. 从[这里](https://lucene.apache.org/solr/downloads.html)下载一份 Solr 的 Binary Release 版。
+2. 启动 Solr Cloud
+3. 创建 xlore 的 collection （中/英文各一个）
+4. 为 collection 分别配置 Schema（使用`dataset/create_schema.sh`）
+5. 为中英文数据创建索引
+
+TODO：具体的指令以后有时间再补吧。
+
 ## API
 ### 搜索
 * Port: 8001
-* URL: To Be Decided
+* URL: localhost
 * Method: GET
 * Body:
 ```javascript
 {
     "query": 查询字符串
-    "page": 当前的页数，大于等于1
+    "page": 查询的页数，大于等于1
 }
 ```
 
@@ -74,16 +84,17 @@ Successful Response
 {
     "total": 检索到的文档总量
     "answer": QA 的答案，如果没有答案的话，就是一个空串
-    "corrected": 更正的结果，如果不需要更正，就是一个空串
     "related": ["xxx", "yyy", ...] 相关实体，可能为空，至多5个
     "documents": [
         document1,
         ...
         // 这是某一个 document 的组成
         {
-            "title": 标题
-            "content": 内容序列，其中奇数项是需要高亮显示的内容
+            "name": 标题
+            "article": 文章主题，其中需要高亮的部分已被打上 `<span class="highlight">...</span>` 的 tag
             "url": 链接
+            "classes"：所属类别的列表，可能为空
+            "properties"：性质列表，可能为空
         },
         ...
         documentn, // n 不超过10，即一页显示的文档数量上限
@@ -141,7 +152,8 @@ Successful Response
 - [x] 纠错（英文）
 - [ ] 分数据集检索（百度、中文维基、英文维基）
 - [ ] 特殊符号处理（比如问号）
-- [x] 相关查询
+- [x] 相关查询（中文）
+- [ ] 相关查询（英文）
 
 ### QA
 

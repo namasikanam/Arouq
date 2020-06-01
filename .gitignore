@@ -3,7 +3,9 @@ scripts/
 dataset/baidu_stopwords.txt
 dataset/info.dump
 *.ttl
+dataset/*.json
 dataset/bert-base-squad2
+backend/*json
 
 # modules
 frontend/node_modules/
@@ -13,3 +15,4 @@ __pycache__/
 # Editor auxiliary directories and files
 .vscode
 .metals/
+*.swp

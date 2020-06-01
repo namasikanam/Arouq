@@ -100,3 +100,4 @@ def bert_QA(question):
 
 if __name__ == '__main__':
     print(bert_QA('What is the climate of China?')) # agriculturally suitable
+    print(bert_QA('Where is Tsinghua University?'))

@@ -1,0 +1,3 @@
+[submodule "dataset/webdict"]
+	path = dataset/webdict
+	url = https://github.com/ling0322/webdict.git

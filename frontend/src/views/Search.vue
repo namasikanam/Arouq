@@ -19,17 +19,17 @@
           <!-- Maybe something wrong happens. -->
           No matched document.
         </div>
-        <b-card class="answer" v-bind:title="answer" v-if="answer !== ''">
+        <b-card class="answer" v-bind:name="answer" v-if="answer !== ''">
         </b-card>
         <div class="document" v-for="item in documents" :key="item.index">
           <div class="url">{{ item.url }}</div>
           <a
-            class="title"
-            v-html="item.title"
+            class="name"
+            v-html="item.name"
             v-bind:href="item.url"
             target="_blank"
           ></a>
-          <div class="content" v-html="item.content"></div>
+          <div class="article" v-html="item.article"></div>
         </div>
         <div class="pagination" v-if="total > 0">
           <b-pagination
@@ -88,11 +88,11 @@ export default {
     async getResults() {
       let response;
       this.$refs.input.updateQuery(this.query);
-      console.log('Before get');
       response = await axios.get("/api/", {
         params: { query: this.query, page: this.page }
       });
-      console.log('After get');
+
+      // The following is just for test
       //   let random_documents = [];
       //   let random_total = Math.floor(Math.random() * 100);
       //   for (let i = 0; i < Math.min(random_total, 10); ++i) {
@@ -100,8 +100,8 @@ export default {
       //     for (let j = Math.floor(Math.random() * 10) + 10; j--;)
       //       random_content.push(randomstring.generate(10) + ' ');
       //     let random_doc = {
-      //       title: randomstring.generate(10),
-      //       content: random_content,
+      //       name: randomstring.generate(10),
+      //       article: random_content,
       //       url: randomstring.generate(3) + "." + randomstring.generate(5) + "." + randomstring.generate(3)
       //     }
       //     random_documents.push(random_doc);
@@ -127,25 +127,12 @@ export default {
       this.total = response.data.total;
       this.answer = response.data.answer;
       for (let i = 0; i < response.data.documents.length; ++i) {
-        let resdoc = response.data.documents[i]
-        let doc = {
-          title: resdoc.title,
-          content: "",
-          url: resdoc.url,
-          index: i
-        };
-        for (let j = 0; j < resdoc.content.length; ++j)
-          if (j % 2 == 1) {
-            doc.content += "\<span class=\"highlight\"\>" + resdoc.content[j] + "\</span\>"
-          }
-          else {
-            doc.content += resdoc.content[j]
-          }
-        if (doc.title !== "") {
+        let doc = response.data.documents[i]
+        if (doc.name !== "") {
           documents.push(doc);
         }
         else {
-          console.log("ERROR: receive a document without title!");
+          console.log("ERROR: receive a document without name!");
         }
       }
       this.documents = documents;
@@ -215,7 +202,7 @@ export default {
   .document {
     margin-top: 20px;
 
-    .title {
+    .name {
       font-size: 18px;
 
       .highlight {
@@ -228,7 +215,7 @@ export default {
       font-size: 12px;
     }
 
-    .content {
+    .article {
       font-size: 14px;
       max-width: 800px;
       overflow-wrap: break-word;
