@@ -11,28 +11,30 @@ import json
 from utils import remove_stopwords
 from utils import contain_english
 
-dic = []
-print("[xlore.property.list]")
-with open('../dataset/xlore.property.list.ttl', encoding='utf-8') as f:
-    cnt = 0
-    label = re.compile(r'<(.*?)> rdfs:label "(.*?)"@(.*?) \.')
-    fullname = re.compile(r'<(.*?)> property:fullname "(.*?)"@.*? \.')
-    for st in f.readlines():
-        cnt += 1
-        match = re.search(label, st)
-        if match is not None:
-            id, name, language = match.groups()
-            dic.append((id, name))
+if __name__ != '__main__':
+    dic = []
+    print("[xlore.property.list]")
+    with open('../dataset/xlore.property.list.ttl', encoding='utf-8') as f:
+        cnt = 0
+        label = re.compile(r'<(.*?)> rdfs:label "(.*?)"@(.*?) \.')
+        fullname = re.compile(r'<(.*?)> property:fullname "(.*?)"@.*? \.')
+        for st in f.readlines():
+            cnt += 1
+            match = re.search(label, st)
+            if match is not None:
+                id, name, language = match.groups()
+                dic.append((id, name))
 
-        if cnt % 10000 == 0: print("\rfinish {}".format(cnt), end = "")
-    print("\n total {}".format(len(dic)))
-dic.sort()
-print("[xlore.property.list] Init End")
+            if cnt % 10000 == 0:
+                print("\rfinish {}".format(cnt), end = "")
+        print("\n total {}".format(len(dic)))
+    dic.sort()
+    print("[xlore.property.list] Init End")
 
-print("[xlore.infobox]")
-db = pymysql.connect("localhost", "root", "123456", "xlore", charset='utf8')
-cursor = db.cursor()
-print("[xlore.infobox] Init End")
+    print("[xlore.infobox]")
+    db = pymysql.connect("localhost", "root", "123456", "xlore", charset='utf8')
+    cursor = db.cursor()
+    print("[xlore.infobox] Init End")
 
 def xlore_get(word): # may throw exception
     resp = requests.get('http://api.xlore.org/query', params = {'word': word})
@@ -145,6 +147,7 @@ def solr(query, page):
     # Split the query by the language
     if contain_english(query):
         tokens = query.split()
+        # tokens = [query]
         language = 'en'
     else:
         tokens = get_tokens(query)
@@ -153,15 +156,14 @@ def solr(query, page):
     # Construct the request to Solr
     query_string = ''
     for token in tokens:
-        query_string += 'name:' + token + '^5'
-        query_string += ' properties:' + token + '^2'
-        query_string += ' article:' + token + '^0.8'
+        query_string += 'name:"' + token + '"^5'
+        query_string += ' properties:' + token + '^0.2'
+        query_string += ' article:' + token + '^1'
         query_string += ' classes:' + token + '^0.1'
-    # query_string = '*:*'
     response = requests.get(f'http://localhost:8983/solr/xlore_{language}/select', params = {
         'q': query_string,
 
-        'start': page * 10,
+        'start': (page - 1) * 10,
         'hl': 'on',
         'hl.method': 'unified',
         'hl.snippets': 100, # A number that is larger than how many properties and classes are intended to show
@@ -210,8 +212,9 @@ def solr(query, page):
     
     # for debug, please comment the following dump
     # in the production environment for performance
-    # with open('response.json', 'w') as f:
-    #     json.dump(res, f, indent = 2)
+    if __name__ == '__main__':
+        with open('response.json', 'w') as f:
+            json.dump(res, f, indent = 2)
 
     return (res['response']['numFound'], ans)
 
@@ -220,4 +223,5 @@ if __name__ == '__main__':
     # print(run("原子的定义"))
     # print(run("清华的知名校友"))
     # solr('russian minister')
-    solr('清华大学')
+    solr('清华大学', 1)
+    # solr('Tsinghua University', 1)

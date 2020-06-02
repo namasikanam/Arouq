@@ -17,6 +17,13 @@ module.exports = {
                 pathRewrite: {
                     '^/api': ''
                 }
+            },
+            '/apj': {
+                target: 'http://127.0.0.1:8002/',
+                changeOrigin: true,
+                pathRewrite: {
+                    '^/apj': '/correct'
+                }
             }
         },
 

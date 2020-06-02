@@ -40,7 +40,7 @@ def main_query():
     return jsonify(result)
 
 
-@app.route('/fill', methods = ['GET'])
+@app.route('/fill/', methods = ['GET'])
 def fill():
     print(request.args)
     word = request.args.get('query')

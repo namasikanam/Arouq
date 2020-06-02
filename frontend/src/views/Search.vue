@@ -13,16 +13,26 @@
     <b-container fluid class="container-main">
       <div class="search-output">
         <div class="total" v-if="total > 0">
-          {{ total.toLocaleString() }} results found.
+          {{ total.toLocaleString() }} results ({{ timecost.toFixed(2) }}
+          seconds)
         </div>
         <div class="no-result" v-if="total === 0 && !init">
-          <!-- Maybe something wrong happens. -->
+          Searching...
+        </div>
+        <div class="no-result" v-if="total === 0 && init">
           No matched document.
         </div>
-        <b-card class="answer" v-bind:name="answer" v-if="answer !== ''">
+        <div class="correct" v-if="corrected !== ''">
+          Do you mean:
+          <a v-on:click="doCorrection" href="javascript:;">
+            {{ corrected }}
+          </a>
+          ?
+        </div>
+        <b-card class="answer" v-bind:title="answer" v-if="answer !== ''">
         </b-card>
         <b-card class="document" v-for="doc in documents" :key="doc.index">
-          <b-card-text class="url"> {{ doc.url }} </b-card-text>
+          <b-card-text class="url"> {{ doc.breadcrumb }} </b-card-text>
           <a
             class="name"
             v-html="doc.name"
@@ -88,16 +98,27 @@ export default {
       total: 0,
       documents: [],
       answer: "",
-      init: false
+      init: false,
+      timecost: 0,
+      corrected: ''
     };
   },
   methods: {
     async getResults() {
       let response;
       this.$refs.input.updateQuery(this.query);
+
+      // call correcter
+      let correct_response = await axios.get("/apj/", {
+        params: { query: this.query }
+      });
+      this.corrected = correct_response.data.corrected;
+
+      let start_stamp = Date.now()
       response = await axios.get("/api/", {
         params: { query: this.query, page: this.page }
       });
+      this.timecost = (Date.now() - start_stamp) / 1000
 
       // The following is just for test
       //   let random_documents = [];
@@ -138,11 +159,11 @@ export default {
         let doc = response.data.documents[i]
         if (doc.name !== "") {
           doc.index = i
-          let items = doc.url.substring(8).split('/')
-          if (items[items.length - 1].length > 30) {
-            items[items.length - 1] = items[items.length - 1].substring(0, 30) + '...'
+          let breadcrumb = doc.url.substring(8).split('/')
+          if (breadcrumb[breadcrumb.length - 1].length > 30) {
+            breadcrumb[breadcrumb.length - 1] = breadcrumb[breadcrumb.length - 1].substring(0, 30) + '...'
           }
-          doc.url = items.join(' > ')
+          doc.breadcrumb = breadcrumb.join(' > ')
 
           // TODO: i have no idea at all,
           // why properties could possibly not exist?
@@ -171,7 +192,7 @@ export default {
         }
       }
       this.documents = documents;
-      this.init = false;
+      this.init = true;
       window.scrollTo(0, 0);
     },
     newSearch(query) {
@@ -185,7 +206,10 @@ export default {
       window.location.assign(
         `/#/search/${this.query}/${page}`
       );
-    }
+    },
+    doCorrection() {
+      window.location.assign(`/#/search/${this.corrected}/1`)
+    },
   },
   mounted() {
     this.getResults();
@@ -216,18 +240,8 @@ export default {
   }
 
   .correct {
-    margin-top: 5px;
-
-    span,
-    a {
-      font-weight: bold;
-    }
-  }
-
-  .suggestion {
-    a {
-      font-weight: bold;
-    }
+    margin-top: 3px;
+    font-weight: bold;
   }
 
   .answer {

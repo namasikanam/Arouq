@@ -3,8 +3,8 @@ from flask_api import status
 from correct import correct
 
 app = Flask(__name__)
-@app.route('/correct', methods = ['GET'])
-def correct():
+@app.route('/correct/', methods = ['GET'])
+def correct_route():
     print(request.args)
     query = request.args.get('query')
     print("[Router] correct: {}".format(query))
