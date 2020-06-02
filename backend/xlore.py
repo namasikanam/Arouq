@@ -11,30 +11,28 @@ import json
 from utils import remove_stopwords
 from utils import contain_english
 
-if __name__ != '__main__':
-    dic = []
-    print("[xlore.property.list]")
-    with open('../dataset/xlore.property.list.ttl', encoding='utf-8') as f:
-        cnt = 0
-        label = re.compile(r'<(.*?)> rdfs:label "(.*?)"@(.*?) \.')
-        fullname = re.compile(r'<(.*?)> property:fullname "(.*?)"@.*? \.')
-        for st in f.readlines():
-            cnt += 1
-            match = re.search(label, st)
-            if match is not None:
-                id, name, language = match.groups()
-                dic.append((id, name))
+dic = []
+print("[xlore.property.list]")
+with open('../dataset/xlore.property.list.ttl', encoding='utf-8') as f:
+    cnt = 0
+    label = re.compile(r'<(.*?)> rdfs:label "(.*?)"@(.*?) \.')
+    fullname = re.compile(r'<(.*?)> property:fullname "(.*?)"@.*? \.')
+    for st in f.readlines():
+        cnt += 1
+        match = re.search(label, st)
+        if match is not None:
+            id, name, language = match.groups()
+            dic.append((id, name))
+        if cnt % 10000 == 0:
+            print("\rfinish {}".format(cnt), end = "")
+    print("\n total {}".format(len(dic)))
+dic.sort()
+print("[xlore.property.list] Init End")
 
-            if cnt % 10000 == 0:
-                print("\rfinish {}".format(cnt), end = "")
-        print("\n total {}".format(len(dic)))
-    dic.sort()
-    print("[xlore.property.list] Init End")
-
-    print("[xlore.infobox]")
-    db = pymysql.connect("localhost", "root", "123456", "xlore", charset='utf8')
-    cursor = db.cursor()
-    print("[xlore.infobox] Init End")
+print("[xlore.infobox]")
+db = pymysql.connect("localhost", "root", "123456", "xlore", charset='utf8')
+cursor = db.cursor()
+print("[xlore.infobox] Init End")
 
 def xlore_get(word): # may throw exception
     resp = requests.get('http://api.xlore.org/query', params = {'word': word})
@@ -110,6 +108,8 @@ def run(question):
                 score = 0
                 for s in item[0]:
                     score += 1 if s in token_string and s not in token else 0
+                if uri['label'] in syns:
+                    score *= 1.5
                 if score > mx:
                     mx = score
                     QA_ret = item[1]
@@ -191,16 +191,18 @@ def solr(query, page):
             doc['name'] = highlighted['name'][0]
         
         for prop in highlighted['properties']:
-            # TODO: cancel the possible highlighting in the prop name
+            sep_place = prop.find('::')
+            p = re.sub(r'<span class="highlight">(.*)</span>', lambda matchObj: matchObj.group(1), prop[:sep_place]) + prop[sep_place:]
             j = 0
             for i in range(len(doc['properties'])):
                 prop_0 = doc['properties'][i]
                 prop_name = prop_0[:prop_0.find('::')]
-                if prop_name in prop:
-                    doc['properties'][i] = prop
+                if prop_name in p:
+                    doc['properties'][i] = p
                     doc['properties'][i], doc['properties'][j] = doc['properties'][j], doc['properties'][i]
                     j = j + 1
                     break
+            
             # We only take the first several properties,
             # this number should be changed according to the effect.
             doc['properties'] = doc['properties'][:10]
@@ -225,7 +227,7 @@ def solr(query, page):
 if __name__ == '__main__':
     # print(run("今天是个好天气"))
     # print(run("原子的定义"))
-    # print(run("清华的知名校友"))
+    print(run("中国的人口"))
     # solr('russian minister')
-    solr('清华大学', 1)
+    # solr('清华大学', 1)
     # solr('Tsinghua University', 1)

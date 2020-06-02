@@ -41,24 +41,32 @@ export default {
     return {
       query: "",
       queryBuffer: '',
-      candidates: []
+      candidates: [],
+      lastUpdateTime: 0,
     };
   },
   methods: {
     goSearch() {
       this.$emit("newSearch", this.query);
     },
+    doComplete(t) {
+      if (this.lastUpdateTime == t) {
+        axios.get(
+          '/api/fill/', {
+          params: { 'query': this.queryBuffer }
+        })
+          .then((response) => {
+            this.candidates = response.data.candidates
+            console.log('candidates = ')
+            console.log(this.candidates)
+          })
+      }
+    },
     updateCompletion(query) {
       this.queryBuffer = query
-      axios.get(
-        '/api/fill/', {
-        params: { 'query': query }
-      })
-        .then((response) => {
-          this.candidates = response.data.candidates
-          console.log('candidates = ')
-          console.log(this.candidates)
-        })
+      this.lastUpdateTime = Date.now()
+      // 1s delay
+      window.setTimeout(this.doComplete, 1000, this.lastUpdateTime);
     },
     autoCompletion() {
       if (this.query === this.queryBuffer) return
@@ -80,7 +88,7 @@ export default {
 
     .input {
       display: flex;
-      width: 500px;
+      width: 1000px;
       vertical-align: middle;
       border: solid 1px #777;
       height: calc(2.25rem + 7px);

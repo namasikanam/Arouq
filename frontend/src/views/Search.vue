@@ -282,14 +282,14 @@ export default {
 
 <style lang="scss">
 .search-output {
-  width: 800px;
+  width: 1000px;
 
   .total,
   .conditions {
     font-size: 14px;
     margin-top: 10px;
     color: #777;
-    max-width: 800px;
+    max-width: 1000px;
   }
 
   .no-result {
@@ -326,7 +326,7 @@ export default {
 
     .article {
       font-size: 14px;
-      max-width: 800px;
+      max-width: 1000px;
       margin-top: 3px;
       margin-bottom: 5px;
       overflow-wrap: break-word;
