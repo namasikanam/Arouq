@@ -93,8 +93,8 @@ Successful Response
             "name": 标题
             "article": 文章主题，其中需要高亮的部分已被打上 `<span class="highlight">...</span>` 的 tag
             "url": 链接
-            "classes"：所属类别的列表，可能为空
-            "properties"：性质列表，可能为空
+            "classes"：所属类别的列表，可能为空，长度不超过10
+            "properties"：性质列表，可能为空，长度不超过10
         },
         ...
         documentn, // n 不超过10，即一页显示的文档数量上限

@@ -203,12 +203,16 @@ def solr(query, page):
                     break
             # We only take the first several properties,
             # this number should be changed according to the effect.
-            doc['properties'] = doc['properties'][:5]
+            doc['properties'] = doc['properties'][:10]
         
         if len(highlighted['article']) == 1:
             # We only take the first several characters,
             # this number should be changed according to the effect.
             doc['article'] = highlighted['article'][0][:(500 if language == 'en' else 1000)]
+        
+        if 'classes' not in doc:
+            doc['classes'] = []
+        doc['classes'] = doc['classes'][:10]
     
     # for debug, please comment the following dump
     # in the production environment for performance

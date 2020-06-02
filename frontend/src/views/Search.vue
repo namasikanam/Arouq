@@ -24,7 +24,7 @@
         </div>
         <div class="correct" v-if="corrected !== ''">
           Do you mean:
-          <a v-on:click="doCorrection" href="javascript:;">
+          <a v-on:click="newSearch(corrected)" href="javascript:;">
             {{ corrected }}
           </a>
           ?
@@ -40,14 +40,38 @@
             target="_blank"
           ></a>
           <b-card-text class="article" v-html="doc.article"></b-card-text>
-          <p class="property" v-for="prop in doc.properties" :key="prop.index">
-            <b> {{ prop.name }} : &nbsp; </b>
-            <span v-html="prop.value"></span>
-          </p>
+
+          <b-row v-for="prop in doc.properties" :key="prop.index">
+            <b-col>
+              <b> {{ prop.name[0] }} : &nbsp; </b>
+              <span v-html="prop.value[0]"></span>
+            </b-col>
+            <b-col v-if="prop.name.length == 2">
+              <b> {{ prop.name[1] }} : &nbsp; </b>
+              <span v-html="prop.value[1]"></span>
+            </b-col>
+          </b-row>
+
           <b-badge class="clss" v-for="clss in doc.classes" :key="clss.index">
             {{ clss.content }}
           </b-badge>
         </b-card>
+        <div class="related" v-if="related.length > 0">
+          <p>Searches related to {{ query }}</p>
+
+          <b-row v-for="rltd in related" :key="rltd.index">
+            <b-col>
+              <a v-on:click="newSearch(rltd.content[0])" href="javascript:;">
+                {{ rltd.content[0] }}
+              </a>
+            </b-col>
+            <b-col v-if="rltd.content[1] !== ''">
+              <a v-on:click="newSearch(rltd.content[1])" href="javascript:;">
+                {{ rltd.content[1] }}
+              </a>
+            </b-col>
+          </b-row>
+        </div>
         <div class="pagination" v-if="total > 0">
           <b-pagination
             size="md"
@@ -101,7 +125,8 @@ export default {
       init: false,
       timecost: 0,
       corrected: '',
-      candidates: []
+      candidates: [],
+      related: []
     };
   },
   methods: {
@@ -166,17 +191,34 @@ export default {
           }
           doc.breadcrumb = breadcrumb.join(' > ')
 
+          let properties = [];
           // TODO: i have no idea at all,
           // why properties could possibly not exist?
           if (!('properties' in doc))
             doc.properties = []
           for (let j = 0; j < doc.properties.length; ++j) {
+            let name = []
+            let value = []
             let s = doc.properties[j]
-            doc.properties[j] = { 'index': ++index }
             let delimit_pos = s.search('::')
-            doc.properties[j]['name'] = s.substring(0, delimit_pos)
-            doc.properties[j]['value'] = s.substring(delimit_pos + 2)
+            name.push(s.substring(0, delimit_pos))
+            value.push(s.substring(delimit_pos + 2))
+            // 50 is just a hard-coded magic number
+            if (j + 1 < doc.properties.length
+              && doc.properties[j].length < 50
+              && doc.properties[j + 1].length < 50) {
+              s = doc.properties[++j]
+              delimit_pos = s.search('::')
+              name.push(s.substring(0, delimit_pos))
+              value.push(s.substring(delimit_pos + 2))
+            }
+            properties.push({
+              'index': ++index,
+              'name': name,
+              'value': value
+            })
           }
+          doc.properties = properties;
           if (!('classes' in doc))
             doc.classes = []
           for (let j = 0; j < doc.classes.length; ++j) {
@@ -193,6 +235,20 @@ export default {
         }
       }
       this.documents = documents;
+      this.related = []
+      for (let i = 0; i < response.data.related.length; i += 2) {
+        this.related.push({
+          'index': ++index,
+          'content': [
+            response.data.related[i],
+            i + 1 < response.data.related.length ? response.data.related[i + 1] : ''
+          ]
+        })
+      }
+
+      console.log('related = ')
+      console.log(this.related)
+
       this.init = true;
       window.scrollTo(0, 0);
     },
@@ -295,6 +351,17 @@ export default {
     .clss {
       font-size: 14px;
       margin-right: 4px;
+    }
+  }
+
+  .related {
+    margin-top: 20px;
+
+    .p {
+      font-weight: bold;
+    }
+
+    .a {
     }
   }
 
