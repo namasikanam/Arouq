@@ -190,16 +190,22 @@ def solr(query, page):
         
         for prop in highlighted['properties']:
             # TODO: cancel the possible highlighting in the prop name
+            j = 0
             for i in range(len(doc['properties'])):
                 prop_0 = doc['properties'][i]
                 prop_name = prop_0[:prop_0.find('::')]
                 if prop_name in prop:
                     doc['properties'][i] = prop
+                    doc['properties'][i], doc['properties'][j] = doc['properties'][j], doc['properties'][i]
+                    j = j + 1
                     break
+            # We only take the first several properties,
+            # this number should be changed according to the effect.
+            doc['properties'] = doc['properties'][:5]
         
         if len(highlighted['article']) == 1:
             # We only take the first several characters,
-            # this number maybe changed after.
+            # this number should be changed according to the effect.
             doc['article'] = highlighted['article'][0][:(500 if language == 'en' else 1000)]
     
     # for debug, please comment the following dump

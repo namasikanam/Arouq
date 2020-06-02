@@ -21,16 +21,23 @@
         </div>
         <b-card class="answer" v-bind:name="answer" v-if="answer !== ''">
         </b-card>
-        <div class="document" v-for="item in documents" :key="item.index">
-          <div class="url">{{ item.url }}</div>
+        <b-card class="document" v-for="doc in documents" :key="doc.index">
+          <b-card-text class="url"> {{ doc.url }} </b-card-text>
           <a
             class="name"
-            v-html="item.name"
-            v-bind:href="item.url"
+            v-html="doc.name"
+            v-bind:href="doc.url"
             target="_blank"
           ></a>
-          <div class="article" v-html="item.article"></div>
-        </div>
+          <b-card-text class="article" v-html="doc.article"></b-card-text>
+          <p class="property" v-for="prop in doc.properties" :key="prop.index">
+            <b> {{ prop.name }} : &nbsp; </b>
+            <span v-html="prop.value"></span>
+          </p>
+          <b-badge class="clss" v-for="clss in doc.classes" :key="clss.index">
+            {{ clss.content }}
+          </b-badge>
+        </b-card>
         <div class="pagination" v-if="total > 0">
           <b-pagination
             size="md"
@@ -126,9 +133,37 @@ export default {
       let documents = [];
       this.total = response.data.total;
       this.answer = response.data.answer;
+      let index = 0;
       for (let i = 0; i < response.data.documents.length; ++i) {
         let doc = response.data.documents[i]
         if (doc.name !== "") {
+          doc.index = i
+          let items = doc.url.substring(8).split('/')
+          if (items[items.length - 1].length > 30) {
+            items[items.length - 1] = items[items.length - 1].substring(0, 30) + '...'
+          }
+          doc.url = items.join(' > ')
+
+          // TODO: i have no idea at all,
+          // why properties could possibly not exist?
+          if (!('properties' in doc))
+            doc.properties = []
+          for (let j = 0; j < doc.properties.length; ++j) {
+            let s = doc.properties[j]
+            doc.properties[j] = { 'index': ++index }
+            let delimit_pos = s.search('::')
+            doc.properties[j]['name'] = s.substring(0, delimit_pos)
+            doc.properties[j]['value'] = s.substring(delimit_pos + 2)
+          }
+          if (!('classes' in doc))
+            doc.classes = []
+          for (let j = 0; j < doc.classes.length; ++j) {
+            doc.classes[j] = {
+              'index': ++index,
+              'content': doc.classes[j]
+            }
+          }
+
           documents.push(doc);
         }
         else {
@@ -201,6 +236,7 @@ export default {
 
   .document {
     margin-top: 20px;
+    border-radius: 10px;
 
     .name {
       font-size: 18px;
@@ -211,19 +247,39 @@ export default {
     }
 
     .url {
+      margin-bottom: 5px;
       max-width: 100%;
-      font-size: 12px;
+      font-size: 14px;
+      color: #5f6368;
     }
 
     .article {
       font-size: 14px;
       max-width: 800px;
+      margin-top: 3px;
+      margin-bottom: 5px;
       overflow-wrap: break-word;
 
       .highlight {
         font-weight: bold;
         color: #c00;
       }
+    }
+
+    .property {
+      font-size: 14px;
+      max-width: 800px;
+      margin-top: 1px;
+      margin-bottom: 1px;
+
+      .highlight {
+        color: #c00;
+      }
+    }
+
+    .clss {
+      font-size: 14px;
+      margin-right: 4px;
     }
   }
 
