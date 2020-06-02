@@ -6,11 +6,35 @@
       <search-input
         class="search-input"
         v-on:newSearch="newSearch"
+        v-on:newSwitch="newSwitch"
         ref="input"
         style="padding-left: 30px"
       ></search-input>
     </b-navbar>
     <b-container fluid class="container-main">
+      <b-alert
+        class="alert"
+        show
+        variant="danger"
+        v-if="!valid && language === 'en'"
+      >
+        <h4 class="alert-heading;font-size: 18px">Search Error!</h4>
+        <p v-if="language == 'en'">
+          For English, only english characters and white space are allowed.
+        </p>
+      </b-alert>
+      <b-alert
+        class="alert"
+        show
+        variant="danger"
+        v-if="!valid && language === 'cn'"
+      >
+        <h4 class="alert-heading;font-size: 18px">搜索错误！</h4>
+        <p>
+          在中文模式下，只允许输入中文字符和空白字符。
+        </p>
+      </b-alert>
+
       <div class="search-output">
         <div class="total" v-if="total > 0">
           {{ total.toLocaleString() }} results ({{ timecost.toFixed(2) }}
@@ -108,13 +132,18 @@ export default {
     if (this.$route.params.page !== undefined) {
       page = parseInt(this.$route.params.page)
     }
+    let language = 'en'
+    if (this.$route.params.language !== undefined && this.$route.params.language === 'cn') {
+      language = 'cn'
+    }
     history.replaceState(
       {
         query,
-        page
+        page,
+        language
       },
       '',
-      `/?#${this.$route.fullPath}`
+      `/?#${this.$route.fullPath}` // TODO: 这也许需要改一下
     )
     return {
       query: query,
@@ -126,13 +155,16 @@ export default {
       timecost: 0,
       corrected: '',
       candidates: [],
-      related: []
+      related: [],
+      language: language,
+      valid: true
     };
   },
   methods: {
     async getResults() {
       let response;
       this.$refs.input.updateQuery(this.query);
+      this.$refs.input.updateLanguage(this.language);
 
       // call correcter
       let correct_response = await axios.get("/apj/", {
@@ -253,19 +285,37 @@ export default {
       window.scrollTo(0, 0);
     },
     newSearch(query) {
-      if (query === "") {
-        window.location.assign("/#/");
-      } else {
-        window.location.assign(`/#/search/${query}/1`);
+      this.valid = true
+      console.log(`language = ${this.language}`)
+      if (this.language === 'en') {
+        this.valid = /^[a-zA-Z\s]*$/.test(query);
+      }
+      else {
+        this.valid = /^[\u4e00-\u9fa5\s]+$/.test(query)
+      }
+      if (this.valid) {
+        if (query === "") {
+          window.location.assign(`/#/home/${this.language}`);
+        } else {
+          window.location.assign(`/#/search/${query}/1/${this.language}`);
+        }
+      }
+    },
+    newSwitch() {
+      if (this.language === 'en') {
+        window.location.assign(`/#/home/cn`);
+      }
+      else {
+        window.location.assign(`/#/home/en`);
       }
     },
     changePage(page) {
       window.location.assign(
-        `/#/search/${this.query}/${page}`
+        `/#/search/${this.query}/${page}/${this.language}`
       );
     },
     doCorrection() {
-      window.location.assign(`/#/search/${this.corrected}/1`)
+      window.location.assign(`/#/search/${this.corrected}/1/${this.language}`)
     },
   },
   mounted() {
@@ -274,6 +324,9 @@ export default {
   beforeRouteUpdate(to, from, next) {
     this.query = to.params.query;
     this.page = parseInt(to.params.page);
+    this.language = to.params.language;
+    if (this.language !== 'en' && this.language !== 'cn')
+      this.language = 'en'
     this.getResults();
     next();
   }
@@ -281,6 +334,14 @@ export default {
 </script>
 
 <style lang="scss">
+.alert {
+  width: 1000px;
+
+  .p {
+    font-size: 14px;
+  }
+}
+
 .search-output {
   width: 1000px;
 

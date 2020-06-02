@@ -13,18 +13,18 @@ Vue.use(BootstrapVue)
 export const router = new Router({
     routes: [
         {
-            path: '/',
-            name: 'home',
-            component: Home
-        },
-        {
-            path: '/search/:query/:page',
+            path: '/search/:query/:page/:language',
             name: 'search',
             component: Search
         },
         {
+            path: '/home/:language',
+            name: 'home',
+            component: Home
+        },
+        {
             path: '*',
-            redirect: '/'
+            redirect: '/home/en'
         }
     ]
 })
