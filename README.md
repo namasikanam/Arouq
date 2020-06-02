@@ -138,11 +138,9 @@ Successful Response
 * Content:
 ```javascript
 {
-    "result": ["xxx", "yyy", ...] 补全结果，至多5个，可能为空列表
+    "candidates": ["xxx", "yyy", ...] 补全结果，至多5个，可能为空列表
 }
 ```
-
-
 
 ## 计划
 
@@ -164,8 +162,7 @@ Successful Response
 
 - [ ] 语音搜索
 - [ ] 搜索的小图标
-- [ ] Breadcrumb
-- [ ] Dark Mode
+- [x] Breadcrumb
 
 ## 开源协议
 

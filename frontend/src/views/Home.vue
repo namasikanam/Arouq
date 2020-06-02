@@ -20,6 +20,20 @@ export default {
   methods: {
     newSearch(query) {
       window.location.assign(`/#/search/${query}/1`);
+    },
+    updateCompletion(query) {
+      this.queryBuffer = query
+      axios.get(
+        '/api/fill/', {
+        params: { 'query': query }
+      })
+        .then((response) => {
+          this.candidates = response.data.candidates
+        })
+    },
+    autoCompletion() {
+      if (this.query === this.queryBuffer) return
+      this.updateCompletion(this.query)
     }
   }
 };

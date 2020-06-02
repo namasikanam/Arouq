@@ -46,7 +46,7 @@ def fill():
     word = request.args.get('query')
     print("[Router] fill: {}".format(word))
     result = {
-        'result': auto_fill(word),
+        'candidates': auto_fill(word),
     }
     print(result)
     return jsonify(result)

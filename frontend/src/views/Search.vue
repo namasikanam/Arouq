@@ -100,7 +100,8 @@ export default {
       answer: "",
       init: false,
       timecost: 0,
-      corrected: ''
+      corrected: '',
+      candidates: []
     };
   },
   methods: {
