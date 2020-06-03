@@ -126,7 +126,7 @@ def run(question):
                     QA_ret = item[1]
                     QA_ret = re.sub(r'\[\[.*?\|', "", QA_ret)
                     QA_ret = re.sub(r'\]\]', "", QA_ret)
-                    keyword = token
+                    keyword = QA_ret
                     print("[Answer]", QA_ret, item)
                 print("      [Item] ", item[0], item[1], score, flush = True)
             if uri['label'] in syns and len(relations) > 2:
@@ -182,7 +182,8 @@ def solr(query, page, keyword):
     response = requests.get(f'http://localhost:8983/solr/xlore_{language}/select', params = {
         'q': query_string,
 
-        'start': (page - 1) * 10,
+        'start': (page - 1) * 7,
+        'rows': 7,
         'hl': 'on',
         'hl.method': 'unified',
         'hl.snippets': 100, # A number that is larger than how many properties and classes are intended to show
@@ -190,11 +191,38 @@ def solr(query, page, keyword):
         'hl.fl': 'name properties article', # highlight article is too complicated
         'hl.tag.pre': '<span class="highlight">',
         'hl.tag.post': '</span>'
-    })
-    
+    }) 
     res = response.json()
 
     ans = res['response']['docs']
+    total = res['response']['numFound']
+
+    if keyword is not None:
+        keyword = keyword.upper()
+        print(f'[keyword] {keyword}')
+        query_string = ''
+        query_string += 'name:"' + keyword + '"^5'
+        query_string += ' properties:' + keyword + '^0.2'
+        query_string += ' article:' + keyword + '^1'
+        query_string += ' classes:' + keyword + '^0.1'
+        response = requests.get(f'http://localhost:8983/solr/xlore_{language}/select', params = {
+            'q': query_string,
+
+            'start': (page - 1) * 3,
+            'rows': 3,
+            'hl': 'on',
+            'hl.method': 'unified',
+            'hl.snippets': 100, # A number that is larger than how many properties and classes are intended to show
+            'hl.fragsize': 0,
+            'hl.fl': 'name properties article', # highlight article is too complicated
+            'hl.tag.pre': '<span class="highlight">',
+            'hl.tag.post': '</span>'
+        })
+
+        res = response.json()
+        for doc in res['response']['docs']:
+            ans.append(doc)
+        total += res['response']['numFound']
 
     id_to_doc = {}
     for doc in ans:
@@ -204,7 +232,7 @@ def solr(query, page, keyword):
     
     j = 0
     for i in range(len(ans)):
-        if re.sub(r'<span class="highlight">(.*)</span>', lambda matchObj: matchObj.group(1), ans[i]['name']) == keyword or re.sub(r'<span class="highlight">(.*)</span>', lambda matchObj: matchObj.group(1), ans[i]['name']) == query:
+        if re.sub(r'<span class="highlight">(.*)</span>', lambda matchObj: matchObj.group(1), ans[i]['name']).upper() == keyword or re.sub(r'<span class="highlight">(.*)</span>', lambda matchObj: matchObj.group(1), ans[i]['name']).upper() == query:
             ans[j], ans[i] = ans[i], ans[j]
             j = j + 1
 
@@ -246,7 +274,7 @@ def solr(query, page, keyword):
         with open('response.json', 'w') as f:
             json.dump(ans, f, indent = 2)
 
-    return (res['response']['numFound'], ans)
+    return (total, ans)
 
 if __name__ == '__main__':
     # print(run("今天是个好天气"))

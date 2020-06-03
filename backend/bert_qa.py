@@ -99,7 +99,7 @@ def bert_QA(question):
             if score > max_score and ans is not None:
                 best_answer = ans
                 max_score = score
-                keyword = word
+                keyword = ans
     print("[QA] answer = {}, score = {}".format(best_answer, max_score))
     return best_answer, max_score, keyword
 
