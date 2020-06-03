@@ -82,23 +82,34 @@ def get_relations(uri):
             ret.append((name, x[2]))
     return ret
 
+def get_syns(token):
+    syns = set()
+    syns.add(token)
+    syn_raw, scores = synonyms.nearby(token)
+    for syn, score in zip(syn_raw, scores):
+        print(syn, score)
+        if score > 0.75:
+            syns.add(syn)
+    return syns
+
+def inside(st, x):
+    for s in st:
+        if s == x:
+            return True
+    return False
+
 def run(question):
     print("[Question] ", question, flush = True)
     tokens = get_tokens(question)
     token_string = ''.join(tokens)
     mx = 0
     QA_ret = None
+    keyword = None
     related = []
     for token in set(tokens):
         print(" [Token] ", token, flush = True)
         uris = xlore_instances(token)
-        syns = set()
-        syns.add(token)
-        syn_raw, scores = synonyms.nearby(token)
-        for syn, score in zip(syn_raw, scores):
-            print(syn, score)
-            if score > 0.75:
-                syns.add(syn)
+        syns = get_syns(token)
         print("    [Synonym]", syns)
         for uri in uris:
             print("    [URI] ", uri['label'], uri['uri'], flush = True)
@@ -115,11 +126,18 @@ def run(question):
                     QA_ret = item[1]
                     QA_ret = re.sub(r'\[\[.*?\|', "", QA_ret)
                     QA_ret = re.sub(r'\]\]', "", QA_ret)
+                    keyword = token
                     print("[Answer]", QA_ret, item)
                 print("      [Item] ", item[0], item[1], score, flush = True)
             if uri['label'] in syns and len(relations) > 2:
-                related.append(uri['related'])
+                related.append((token, uri['related']))
                 print("      [Related]", uri['related'])
+    if keyword is not None:
+        syns = get_syns(keyword)
+        print(syns)
+        print(related)
+        related = filter(lambda x: inside(syns, x[0]), related)
+    related = [x[1] for x in related]
     related_ret = []
     max_related = 5
     if sum([len(x) for x in related]) > max_related:
@@ -141,9 +159,10 @@ def run(question):
     return {
         'QA_ret': QA_ret,
         'related': related_ret,
+        'keyword': keyword,
     }
 
-def solr(query, page):
+def solr(query, page, keyword):
     # Split the query by the language
     if contain_english(query):
         tokens = query.split()
@@ -182,6 +201,12 @@ def solr(query, page):
         id_to_doc[doc['id']] = doc
         del doc['id']
         del doc['_version_']
+    
+    j = 0
+    for i in range(len(ans)):
+        if re.sub(r'<span class="highlight">(.*)</span>', lambda matchObj: matchObj.group(1), ans[i]['name']) == keyword or re.sub(r'<span class="highlight">(.*)</span>', lambda matchObj: matchObj.group(1), ans[i]['name']) == query:
+            ans[j], ans[i] = ans[i], ans[j]
+            j = j + 1
 
     for id, highlighted in res['highlighting'].items():
         doc = id_to_doc[id]
@@ -189,7 +214,6 @@ def solr(query, page):
         assert len(highlighted['name']) <= 1
         if len(highlighted['name']) == 1:
             doc['name'] = highlighted['name'][0]
-        
         for prop in highlighted['properties']:
             sep_place = prop.find('::')
             p = re.sub(r'<span class="highlight">(.*)</span>', lambda matchObj: matchObj.group(1), prop[:sep_place]) + prop[sep_place:]
@@ -220,14 +244,16 @@ def solr(query, page):
     # in the production environment for performance
     if __name__ == '__main__':
         with open('response.json', 'w') as f:
-            json.dump(res, f, indent = 2)
+            json.dump(ans, f, indent = 2)
 
     return (res['response']['numFound'], ans)
 
 if __name__ == '__main__':
     # print(run("今天是个好天气"))
     # print(run("原子的定义"))
-    print(run("中国的人口"))
+    # print(run("清华的位置"))
+    # print(run("清华的院系设置"))
     # solr('russian minister')
     # solr('清华大学', 1)
     # solr('Tsinghua University', 1)
+    solr('清华大学', 1, '北京')

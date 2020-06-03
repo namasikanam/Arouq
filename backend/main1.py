@@ -17,18 +17,21 @@ def main_query():
     print("[Router] Query: {}".format(query))
     
     ans = None
+    keyword = None
     if contain_english(query):
         if page == 1:
-            ans, score = english_qa(query)
+            ans, score, keyword = english_qa(query)
             if score < 3:
                 ans = None
+                keyword = None
         related = []
     else:
         ret = chinese(query)
         if page == 1:
             ans = ret['QA_ret']
         related = ret['related']
-    total, documents = solr(query, page)
+        keyword = ret['keyword']
+    total, documents = solr(query, page, keyword)
 
     result = {
         'answer': ans if ans is not None else '',
@@ -37,6 +40,57 @@ def main_query():
         'documents': documents
     }
     print(result)
+    return jsonify(result)
+
+
+@app.route('/en/', methods = ['GET'])
+def en_query():
+    print(request.args)
+    query = request.args.get('query')
+    page = int(request.args.get('page'))
+
+    print("[Router] English Query: {}".format(query))
+    
+    ans = None
+    keyword = None
+    if page == 1:
+        ans, score, keyword = english_qa(query)
+        if score < 3:
+            ans = None
+            keyword = None
+    total, documents = solr(query, page, keyword)
+
+    result = {
+        'answer': ans if ans is not None else '',
+        'total': total,
+        'related': [],
+        'documents': documents
+    }
+    return jsonify(result)
+
+@app.route('/zh/', methods = ['GET'])
+def zh_query():
+    print(request.args)
+    query = request.args.get('query')
+    page = int(request.args.get('page'))
+
+    print("[Router] Chinese Query: {}".format(query))
+    
+    ans = None
+    keyword = None
+    ret = chinese(query)
+    if page == 1:
+        ans = ret['QA_ret']
+    related = ret['related']
+    keyword = ret['keyword']
+    total, documents = solr(query, page, keyword)
+
+    result = {
+        'answer': ans if ans is not None else '',
+        'total': total,
+        'related': related,
+        'documents': documents
+    }
     return jsonify(result)
 
 

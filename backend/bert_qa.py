@@ -51,6 +51,8 @@ def get_keywords(question):
 
 def wiki_sentence(word):
     page = wiki.page(word).text
+    page = page.replace('.\n', '. ')
+    page = page.replace('\n', '. ')
     return sent_tokenize(page)
 
 
@@ -60,9 +62,12 @@ def bert_QA(question):
     print("[Keywords]", keywords)
     max_score = -2
     best_answer = None 
+    keyword = None
     for word in keywords:
         print("[QA] word: ", word)
         sents = wiki_sentence(word)
+        if len(sents) == 0:
+            continue
         idf = {}
         for word in keywords:
             idf[word] = 2
@@ -94,10 +99,11 @@ def bert_QA(question):
             if score > max_score and ans is not None:
                 best_answer = ans
                 max_score = score
+                keyword = word
     print("[QA] answer = {}, score = {}".format(best_answer, max_score))
-    return best_answer, max_score
+    return best_answer, max_score, keyword
 
 
 if __name__ == '__main__':
     print(bert_QA('What is the climate of China?')) # agriculturally suitable
-    print(bert_QA('Where is Tsinghua University?'))
+    print(bert_QA('what is the earliest form of football?'))

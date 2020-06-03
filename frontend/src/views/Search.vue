@@ -278,6 +278,8 @@ export default {
         })
       }
 
+      console.log('response.data.related = ')
+      console.log(response.data.related)
       console.log('related = ')
       console.log(this.related)
 
