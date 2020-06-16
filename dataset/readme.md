@@ -7,10 +7,13 @@
 │   ├── pytorch_model.bin
 │   └── vocab.txt
 ├── gen-info.py
-├── readme.md
 ├── webdict
 │   └── webdict_with_freq.txt
-└── xlore.property.list.ttl
+├── xlore.property.list.ttl
+├── create_schema.sh
+├── instances_cn.json
+├── instances_en.json
+└── readme.md
 ```
 
 # xlore_qa.py 所需的文件
@@ -23,3 +26,6 @@ bert-base-squad2 下的模型
 
 # 自动补全所需的文件
 webdict 仓库，克隆自 https://github.com/ling0322/webdict.git
+
+# 实体检索所需的文件
+整理自 xlore 的 instances_cn.json 和 instances_en.json
